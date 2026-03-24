@@ -17,113 +17,128 @@ stmt
     ;
 
 varDecl
-    : 'var' ID '=' expr ';'     #VarDeclComValor
-    | 'var' ID ';'              #VarDeclSemValor
+    : VAR ID ASSIGN expr SEMI     #VarDeclComValor
+    | VAR ID SEMI                #VarDeclSemValor
     ;
 
 assign
-    : ID '=' expr ';'           #Atribuicao
+    : ID ASSIGN expr SEMI        #Atribuicao
     ;
 
 ifStmt
-    : 'if' '(' cond ')' block   #If
+    : IF LPAREN cond RPAREN block   #If
     ;
 
 whileStmt
-    : 'while' '(' cond ')' block   #While
+    : WHILE LPAREN cond RPAREN block   #While
     ;
 
 printStmt
-    : 'print' '(' STRING ')' ';'   #PrintTexto
-    | 'print' '(' expr ')' ';'     #PrintExpr
+    : PRINT LPAREN STRING RPAREN SEMI   #PrintTexto
+    | PRINT LPAREN expr RPAREN SEMI     #PrintExpr
     ;
 
 inputStmt
-    : 'input' '(' ID ')' ';'       #Input
+    : INPUT LPAREN ID RPAREN SEMI       #Input
     ;
 
 block
-    : '{' stmt* '}'
+    : LBRACE stmt* RBRACE
     ;
 
 // --------------------
-// CONDIÇÕES (SEM AMBIGUIDADE)
+// CONDIÇÕES
 // --------------------
 cond
-    : cond 'or' cond2         #CondOr
-    | cond2                   #CondBase
+    : cond OR cond2         #CondOr
+    | cond2                 #CondBase
     ;
 
 cond2
-    : cond2 'and' cond3       #CondAnd
-    | cond3                   #CondBase2
+    : cond2 AND cond3       #CondAnd
+    | cond3                 #CondBase2
     ;
 
 cond3
-    : '(' cond ')'            #CondParenteses
-    | expr condOp expr        #CondComparacao
-    | 'true'                  #CondTrue
-    | 'false'                 #CondFalse
+    : LPAREN cond RPAREN    #CondParenteses
+    | expr condOp expr      #CondComparacao
+    | TRUE                  #CondTrue
+    | FALSE                 #CondFalse
     ;
 
-// --------------------
-// OPERADORES
-// --------------------
 condOp
-    : '<'
-    | '>'
-    | '<='
-    | '>='
-    | '=='
-    | '!='
+    : LT
+    | GT
+    | LE
+    | GE
+    | EQ
+    | NEQ
     ;
 
 // --------------------
-// EXPRESSÕES (COM PRECEDÊNCIA)
+// EXPRESSÕES
 // --------------------
 expr
-    : expr '+' termo          #Soma
-    | expr '-' termo          #Subtracao
-    | termo                   #ExprBase
+    : expr op=(PLUS | MINUS) termo   #SomaSub
+    | termo                          #ExprBase
     ;
 
 termo
-    : termo '*' fator         #Multiplicacao
-    | termo '/' fator         #Divisao
-    | fator                   #TermoBase
+    : termo op=(MUL | DIV) fator     #MulDiv
+    | fator                          #TermoBase
     ;
 
 fator
-    : '-' fator               #NegacaoUnaria
-    | base '^' fator          #Potencia
-    | base                    #FatorBase
+    : MINUS fator                    #NegacaoUnaria
+    | base op=POW fator              #Potencia
+    | base                           #FatorBase
     ;
 
 base
-    : '(' expr ')'            #ExprParenteses
-    | NUMBER                  #Numero
-    | ID                      #UsoVariavel
+    : LPAREN expr RPAREN             #ExprParenteses
+    | NUMBER                         #Numero
+    | ID                             #UsoVariavel
     ;
 
 // --------------------
-// LÉXICO
+// TOKENS
 // --------------------
-NUMBER
-    : [0-9]+ ('.' [0-9]+)?
-    ;
+VAR     : 'var';
+IF      : 'if';
+WHILE   : 'while';
+PRINT   : 'print';
+INPUT   : 'input';
 
-STRING
-    : '"' (~["\r\n])* '"'
-    ;
+AND     : 'and';
+OR      : 'or';
+TRUE    : 'true';
+FALSE   : 'false';
 
-ID
-    : [a-zA-Z_] [a-zA-Z_0-9]*
-    ;
+LPAREN  : '(';
+RPAREN  : ')';
+LBRACE  : '{';
+RBRACE  : '}';
 
-WS
-    : [ \t\r\n]+ -> skip
-    ;
+PLUS    : '+';
+MINUS   : '-';
+MUL     : '*';
+DIV     : '/';
+POW     : '^';
 
-COMMENT
-    : '//' ~[\r\n]* -> skip
-    ;
+ASSIGN  : '=';
+SEMI    : ';';
+
+GT      : '>';
+GE      : '>=';
+LT      : '<';
+LE      : '<=';
+EQ      : '==';
+NEQ     : '!=';
+
+ID      : [a-zA-Z_][a-zA-Z_0-9]*;
+NUMBER  : [0-9]+ ('.' [0-9]+)?;
+
+STRING  : '"' (~["\r\n])* '"';
+
+WS      : [ \t\r\n]+ -> skip;
+COMMENT : '//' ~[\r\n]* -> skip;
