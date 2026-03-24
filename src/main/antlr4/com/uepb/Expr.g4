@@ -4,7 +4,9 @@ prog
     : stmt* EOF
     ;
 
-// Instrução
+// --------------------
+// INSTRUÇÕES
+// --------------------
 stmt
     : varDecl
     | assign
@@ -23,76 +25,105 @@ assign
     : ID '=' expr ';'           #Atribuicao
     ;
 
-// if (cond) {}
 ifStmt
-    : 'if' '(' COND=cond ')' BLOCO=block    #If
+    : 'if' '(' cond ')' block   #If
     ;
 
-// while (cond) {}
 whileStmt
-    : 'while' '(' COND=cond ')' BLOCO=block     #While
+    : 'while' '(' cond ')' block   #While
     ;
 
 printStmt
-    : 'print' '(' STRING ')' ';'    #PrintTexto
-    | 'print' '(' expr ')' ';'      #PrintExpr
+    : 'print' '(' STRING ')' ';'   #PrintTexto
+    | 'print' '(' expr ')' ';'     #PrintExpr
     ;
 
 inputStmt
-    : 'input' '(' ID ')' ';'        #Input
+    : 'input' '(' ID ')' ';'       #Input
     ;
 
-// bloco de instruções entre chaves
 block
     : '{' stmt* '}'
     ;
 
-// condiçoes if e while
+// --------------------
+// CONDIÇÕES (SEM AMBIGUIDADE)
+// --------------------
 cond
-    : E1=cond 'or' E2=cond              #CondOr
-    | E1=cond 'and' E2=cond             #CondAnd
-    | '(' COND_INTERNA=cond ')'         #CondParenteses
-    | E1=expr OP=condOp E2=expr         #CondComparacao
-    | 'true'                            #CondTrue
-    | 'false'                           #CondFalse
+    : cond 'or' cond2         #CondOr
+    | cond2                   #CondBase
     ;
 
-// comparação
+cond2
+    : cond2 'and' cond3       #CondAnd
+    | cond3                   #CondBase2
+    ;
+
+cond3
+    : '(' cond ')'            #CondParenteses
+    | expr condOp expr        #CondComparacao
+    | 'true'                  #CondTrue
+    | 'false'                 #CondFalse
+    ;
+
+// --------------------
+// OPERADORES
+// --------------------
 condOp
-    : '<'       #OpMenor
-    | '>'       #OpMaior
-    | '<='      #OpMenorIgual
-    | '>='      #OpMaiorIgual
-    | '=='      #OpIgual
-    | '!='      #OpDiferente
+    : '<'
+    | '>'
+    | '<='
+    | '>='
+    | '=='
+    | '!='
     ;
 
-// expressão aritmetica
+// --------------------
+// EXPRESSÕES (COM PRECEDÊNCIA)
+// --------------------
 expr
-    : <assoc=right> BASE=expr '^' EXP=expr      #Potencia
-    | O1=expr OP='*' O2=expr                    #Multiplicacao
-    | O1=expr OP='/' O2=expr                    #Divisao
-    | O1=expr OP='+' O2=expr                    #Soma
-    | O1=expr OP='-' O2=expr                    #Subtracao
-    | SINAL='-' VALOR=expr                       #NegacaoUnaria
-    | '(' EXPR_INTERNA=expr ')'                  #ExprParenteses
-    | NUMBER                                     #Numero
-    | ID                                         #UsoVariavel
+    : expr '+' termo          #Soma
+    | expr '-' termo          #Subtracao
+    | termo                   #ExprBase
     ;
 
+termo
+    : termo '*' fator         #Multiplicacao
+    | termo '/' fator         #Divisao
+    | fator                   #TermoBase
+    ;
 
+fator
+    : '-' fator               #NegacaoUnaria
+    | base '^' fator          #Potencia
+    | base                    #FatorBase
+    ;
+
+base
+    : '(' expr ')'            #ExprParenteses
+    | NUMBER                  #Numero
+    | ID                      #UsoVariavel
+    ;
+
+// --------------------
+// LÉXICO
+// --------------------
 NUMBER
     : [0-9]+ ('.' [0-9]+)?
     ;
+
 STRING
     : '"' (~["\r\n])* '"'
     ;
+
 ID
     : [a-zA-Z_] [a-zA-Z_0-9]*
     ;
+
 WS
     : [ \t\r\n]+ -> skip
     ;
+
 COMMENT
     : '//' ~[\r\n]* -> skip
     ;
