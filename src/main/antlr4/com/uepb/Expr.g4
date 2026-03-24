@@ -84,7 +84,7 @@ expr
     ;
 
 termo
-    : termo op=(MUL | DIV) fator     #MulDiv
+    : termo op=(MUL | DIV) fator     #MultiDiv
     | fator                          #TermoBase
     ;
 
