@@ -20,6 +20,18 @@ public class ScopeControl {
     public SymbolTable getCurrentScope(){
         return stack.peek();
     }
+    public Variables declare(String name, int address){
+    var current = getCurrentScope();
+
+    if (current.exists(name)) {
+        throw new RuntimeException("Variável já declarada: " + name);
+    }
+
+    var variable = new Variables(name, address);
+    current.add(name, variable);
+
+    return variable;
+    }
 
     public Optional<Variables> lookup(String name){
         return stack.stream()
