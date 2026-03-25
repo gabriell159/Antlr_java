@@ -11,13 +11,13 @@ public class ScopeControl {
         createScope();
     }
 
-    public void createScope(){
+    public final void createScope(){
         stack.push(new SymbolTable());
     }
-    public void dropScope(){
+    public final void dropScope(){
         stack.pop();
     }
-    public SymbolTable getCurrentScope(){
+    public final SymbolTable getCurrentScope(){
         return stack.peek();
     }
     public Variables declare(String name, int address){
