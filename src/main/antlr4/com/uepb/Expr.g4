@@ -4,7 +4,9 @@ prog
     : stmt* EOF
     ;
 
-// Instrução
+// --------------------
+// INSTRUÇÕES
+// --------------------
 stmt
     : varDecl
     | assign
@@ -15,84 +17,128 @@ stmt
     ;
 
 varDecl
-    : 'var' ID '=' expr ';'     #VarDeclComValor
-    | 'var' ID ';'              #VarDeclSemValor
+    : VAR ID ASSIGN expr SEMI     #VarDeclComValor
+    | VAR ID SEMI                #VarDeclSemValor
     ;
 
 assign
-    : ID '=' expr ';'           #Atribuicao
+    : ID ASSIGN expr SEMI        #Atribuicao
     ;
 
-// if (cond) {}
 ifStmt
-    : 'if' '(' COND=cond ')' BLOCO=block    #If
+    : IF LPAREN cond RPAREN block   #If
     ;
 
-// while (cond) {}
 whileStmt
-    : 'while' '(' COND=cond ')' BLOCO=block     #While
+    : WHILE LPAREN cond RPAREN block   #While
     ;
 
 printStmt
-    : 'print' '(' STRING ')' ';'    #PrintTexto
-    | 'print' '(' expr ')' ';'      #PrintExpr
+    : PRINT LPAREN STRING RPAREN SEMI   #PrintTexto
+    | PRINT LPAREN expr RPAREN SEMI     #PrintExpr
     ;
 
 inputStmt
-    : 'input' '(' ID ')' ';'        #Input
+    : INPUT LPAREN ID RPAREN SEMI       #Input
     ;
 
-// bloco de instruções entre chaves
 block
-    : '{' stmt* '}'
+    : LBRACE stmt* RBRACE
     ;
 
-// condiçoes if e while
+// --------------------
+// CONDIÇÕES
+// --------------------
 cond
-    : E1=cond 'or' E2=cond              #CondOr
-    | E1=cond 'and' E2=cond             #CondAnd
-    | '(' COND_INTERNA=cond ')'         #CondParenteses
-    | E1=expr OP=condOp E2=expr         #CondComparacao
-    | 'true'                            #CondTrue
-    | 'false'                           #CondFalse
+    : cond OR cond2         #CondOr
+    | cond2                 #CondBase
     ;
 
-// comparação
+cond2
+    : cond2 AND cond3       #CondAnd
+    | cond3                 #CondBase2
+    ;
+
+cond3
+    : LPAREN cond RPAREN    #CondParenteses
+    | expr condOp expr      #CondComparacao
+    | TRUE                  #CondTrue
+    | FALSE                 #CondFalse
+    ;
+
 condOp
-    : '<'       #OpMenor
-    | '>'       #OpMaior
-    | '<='      #OpMenorIgual
-    | '>='      #OpMaiorIgual
-    | '=='      #OpIgual
-    | '!='      #OpDiferente
+    : LT
+    | GT
+    | LE
+    | GE
+    | EQ
+    | NEQ
     ;
 
-// expressão aritmetica
+// --------------------
+// EXPRESSÕES
+// --------------------
 expr
-    : <assoc=right> BASE=expr '^' EXP=expr      #Potencia
-    | O1=expr OP='*' O2=expr                    #Multiplicacao
-    | O1=expr OP='/' O2=expr                    #Divisao
-    | O1=expr OP='+' O2=expr                    #Soma
-    | O1=expr OP='-' O2=expr                    #Subtracao
-    | SINAL='-' VALOR=expr                       #NegacaoUnaria
-    | '(' EXPR_INTERNA=expr ')'                  #ExprParenteses
-    | NUMBER                                     #Numero
-    | ID                                         #UsoVariavel
+    : expr op=(PLUS | MINUS) termo   #SomaSub
+    | termo                          #ExprBase
     ;
 
+termo
+    : termo op=(MUL | DIV) fator     #MultiDiv
+    | fator                          #TermoBase
+    ;
 
-NUMBER
-    : [0-9]+ ('.' [0-9]+)?
+fator
+    : MINUS fator                    #NegacaoUnaria
+    | base op=POW fator              #Potencia
+    | base                           #FatorBase
     ;
-STRING
-    : '"' (~["\r\n])* '"'
+
+base
+    : LPAREN expr RPAREN             #ExprParenteses
+    | NUMBER                         #Numero
+    | ID                             #UsoVariavel
     ;
-ID
-    : [a-zA-Z_] [a-zA-Z_0-9]*
-    ;
-WS
-    : [ \t\r\n]+ -> skip
-    ;
-COMMENT
-    : '//' ~[\r\n]* -> skip
-    ;
+
+// --------------------
+// TOKENS
+// --------------------
+VAR     : 'var';
+IF      : 'if';
+WHILE   : 'while';
+PRINT   : 'print';
+INPUT   : 'input';
+
+AND     : 'and';
+OR      : 'or';
+TRUE    : 'true';
+FALSE   : 'false';
+
+LPAREN  : '(';
+RPAREN  : ')';
+LBRACE  : '{';
+RBRACE  : '}';
+
+PLUS    : '+';
+MINUS   : '-';
+MUL     : '*';
+DIV     : '/';
+POW     : '^';
+
+ASSIGN  : '=';
+SEMI    : ';';
+
+GT      : '>';
+GE      : '>=';
+LT      : '<';
+LE      : '<=';
+EQ      : '==';
+NEQ     : '!=';
+
+ID      : [a-zA-Z_][a-zA-Z_0-9]*;
+NUMBER  : [0-9]+ ('.' [0-9]+)?;
+
+STRING  : '"' (~["\r\n])* '"';
+
+WS      : [ \t\r\n]+ -> skip;
+COMMENT : '//' ~[\r\n]* -> skip;
