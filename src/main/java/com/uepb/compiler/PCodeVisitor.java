@@ -41,7 +41,7 @@ public class PCodeVisitor extends ExprBaseVisitor<Void> {
     @Override
     public Void visitPrintExpr(ExprParser.PrintExprContext ctx) {
         visit(ctx.expr());
-        out.println("out"); // No seu manual_pcode, 'out' escreve o topo da pilha
+        out.println("out"); // No manual_pcode, out escreve o topo da pilha
         return null;
     }
 
@@ -90,7 +90,7 @@ public class PCodeVisitor extends ExprBaseVisitor<Void> {
     public Void visitIf(ExprParser.IfContext ctx) {
         String labelFim = newLabel();
         visit(ctx.COND); // Gera código da condição (deixa true/false na pilha)
-        out.println("fjp " + labelFim); // Pula para o fim se for falso
+        out.println("fjp " + labelFim); // Pula pro fim se for falso
         visit(ctx.BLOCO);
         out.println(labelFim + ":");
         return null;
