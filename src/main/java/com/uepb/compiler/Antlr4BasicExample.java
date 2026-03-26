@@ -21,17 +21,13 @@ public class Antlr4BasicExample implements CompilerEngine{
         var parser = new ExprParser(tokens);
         var tree = parser.prog();
 
-        // 1. Mostra a interface se o verbose for true
         if(verbose){
             var guiTask = new GuiVizualizerTask(parser, tree);
-            guiTask.run(); // Aqui ele pausa até o ENTER
+            guiTask.run(); 
         }
-
-        // 2. AGORA SIM: Chame a sua Calculadora para validar e gerar código
         Calculadora calculadora = new Calculadora();
-        calculadora.visit(tree); // <--- É AQUI que o RuntimeException vai estourar!
+        calculadora.visit(tree); 
 
-        // 3. (Opcional) Salvar o P-Code gerado no arquivo de saída
         String pCode = calculadora.getCode();
         java.nio.file.Files.writeString(output.toPath(), pCode);
         
