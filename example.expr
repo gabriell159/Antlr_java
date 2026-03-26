@@ -6,6 +6,6 @@ if (x < y and x == 5 or  true) {
 }
 while (x < 10) {
     print("O valor de x é :");
-    print(x)
+    print(x);
     x=x+1;
 }
