@@ -23,7 +23,6 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         for (var expressao : ctx.stmt()) {
             visit(expressao);
         }
-        code.append("out\n");
         code.append("hlt\n");
         return null;
     }
@@ -34,9 +33,54 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     }
     @Override
     public Void visitPotencia(ExprParser.PotenciaContext ctx) {
-        visit(ctx.base()); //esquerda 
-        visit(ctx.fator()); //direita 
-        code.append("exp\n");
+        int addrBase = memoryMapper.allocate();
+        int addrExp = memoryMapper.allocate();
+        int addrAcc = memoryMapper.allocate();
+
+        //base
+        code.append("push $").append(addrBase).append("\n");
+        visit(ctx.base()); 
+        code.append("sto\n");
+
+        //expoente
+        code.append("push $").append(addrExp).append("\n");
+        visit(ctx.fator()); 
+        code.append("sto\n");
+
+        // acumulador
+        code.append("push $").append(addrAcc).append("\n");
+        code.append("push 1\n");
+        code.append("sto\n");
+
+        String inicioLoop = createLabel();
+        String fimLoop = createLabel();
+        code.append(inicioLoop).append(":\n");
+
+        code.append("push $").append(addrExp).append("\n");
+        code.append("lod\n");
+        code.append("push 0\n"); 
+        code.append("grt\n");
+        code.append("fjp ").append(fimLoop).append("\n");
+
+        code.append("push $").append(addrAcc).append("\n");
+        code.append("push $").append(addrAcc).append("\n");
+        code.append("lod\n");
+        code.append("push $").append(addrBase).append("\n");
+        code.append("lod\n");
+        code.append("mul\n");
+        code.append("sto\n");
+
+        code.append("push $").append(addrExp).append("\n");
+        code.append("push $").append(addrExp).append("\n");
+        code.append("lod\n");
+        code.append("push 1\n");
+        code.append("sub\n");
+        code.append("sto\n");
+
+        code.append("ujp ").append(inicioLoop).append("\n");
+        code.append(fimLoop).append(":\n");
+        code.append("push $").append(addrAcc).append("\n");
+        code.append("lod\n");
         return null;
     }
 
@@ -107,9 +151,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         int address = memoryMapper.allocate(); // usa o mapper
         scopes.declare(nome, address);         // registra no escopo
 
-        visit(ctx.expr());
-
         code.append("push $").append(address).append("\n");
+        visit(ctx.expr());
         code.append("sto\n");
 
         return null;
@@ -122,8 +165,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         int address = memoryMapper.allocate(); // usa o mapper
         scopes.declare(nome, address);         // registra no escopo
 
+        code.append("push $").append(address).append("\n");
         code.append("push 0\n"); // valor padrão
-        code.append("store ").append(nome).append("\n");
+        code.append("sto\n");
 
         return null;
     }
@@ -142,9 +186,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         var address = declaracaoOpt.get().address();
 
-        visit(ctx.expr()); // valor primeiro
-
         code.append("push $").append(address).append("\n");
+        visit(ctx.expr()); 
         code.append("sto\n");
 
         return null;
@@ -164,8 +207,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
         var address = declaracaoOpt.get().address();
 
-        code.append("in\n");
         code.append("push $").append(address).append("\n");
+        code.append("in\n");
         code.append("sto\n");
 
         return null;
@@ -173,14 +216,15 @@ public class Calculadora extends ExprBaseVisitor<Void> {
 
     @Override
     public Void visitPrintTexto(ExprParser.PrintTextoContext ctx) {
-        code.append("prts ").append(ctx.STRING().getText()).append("\n");
+        code.append("push").append(ctx.STRING().getText()).append("\n");
+        code.append("out\n");
         return null;
     }
 
     @Override
     public Void visitPrintExpr(ExprParser.PrintExprContext ctx) {
         visit(ctx.expr());
-        code.append("prt\n");
+        code.append("out\n");
         return null;
     }
 
@@ -244,9 +288,9 @@ public class Calculadora extends ExprBaseVisitor<Void> {
             case "==" -> code.append("equ\n");
             case "!=" -> code.append("neq\n");
             case "<"  -> code.append("let\n");
-            case "<=" -> code.append("leq\n");
-            case ">"  -> code.append("gtn\n");
-            case ">=" -> code.append("geq\n");
+            case "<=" -> code.append("lte\n");
+            case ">"  -> code.append("grt\n");
+            case ">=" -> code.append("gte\n");
         }
         return null;
     }
@@ -267,12 +311,12 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     }
     @Override
     public Void visitCondTrue(ExprParser.CondTrueContext ctx) {
-        code.append("push 1\n");
+        code.append("push true\n");
         return null;
     }
     @Override
     public Void visitCondFalse(ExprParser.CondFalseContext ctx) {
-        code.append("push 0\n");
+        code.append("push false\n");
         return null;
     }
     @Override
