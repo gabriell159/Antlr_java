@@ -104,8 +104,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     public Void visitVarDeclComValor(ExprParser.VarDeclComValorContext ctx) {
         String nome = ctx.ID().getText();
 
-        int address = memoryMapper.allocate(); // 🔥 usa o mapper
-        scopes.declare(nome, address);         // 🔥 registra no escopo
+        int address = memoryMapper.allocate(); // usa o mapper
+        scopes.declare(nome, address);         // registra no escopo
 
         visit(ctx.expr());
 
@@ -119,8 +119,8 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     public Void visitVarDeclSemValor(ExprParser.VarDeclSemValorContext ctx) {
         String nome = ctx.ID().getText();
 
-        int address = memoryMapper.allocate(); // 🔥 usa o mapper
-        scopes.declare(nome, address);         // 🔥 registra no escopo
+        int address = memoryMapper.allocate(); // usa o mapper
+        scopes.declare(nome, address);         // registra no escopo
 
         code.append("push 0\n"); // valor padrão
         code.append("store ").append(nome).append("\n");
@@ -243,7 +243,7 @@ public class Calculadora extends ExprBaseVisitor<Void> {
         switch (ctx.condOp().getText()) {
             case "==" -> code.append("equ\n");
             case "!=" -> code.append("neq\n");
-            case "<"  -> code.append("ltn\n");
+            case "<"  -> code.append("let\n");
             case "<=" -> code.append("leq\n");
             case ">"  -> code.append("gtn\n");
             case ">=" -> code.append("geq\n");

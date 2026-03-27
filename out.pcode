@@ -11,7 +11,7 @@ push $0
 lod
 push $1
 lod
-ltn
+let
 push $0
 lod
 push 5
@@ -26,7 +26,7 @@ L1:
 push $0
 lod
 push 10
-ltn
+let
 fjp L2
 prts "O valor de x é:"
 push $0
