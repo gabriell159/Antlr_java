@@ -3,7 +3,6 @@ package com.uepb.compiler;
 import com.uepb.ExprBaseVisitor;
 import com.uepb.ExprParser;
 
-
 public class Calculadora extends ExprBaseVisitor<Void> {
     private final ScopeControl scopes = new ScopeControl();
     private final MemoryMapper memoryMapper = new MemoryMapper();
@@ -281,5 +280,4 @@ public class Calculadora extends ExprBaseVisitor<Void> {
     visit(ctx.cond());
     return null;
     }
-    //Continuar a partir do LOOP
 }

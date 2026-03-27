@@ -31,6 +31,7 @@ public class Antlr4BasicExample implements CompilerEngine{
         String pCode = calculadora.getCode();
         java.nio.file.Files.writeString(output.toPath(), pCode);
         
+        System.out.println("Código P gerado:\n" + pCode);
         System.out.println("Compilação finalizada com sucesso. Arquivo gerado: " + output.getName());
     }
 

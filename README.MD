@@ -7,6 +7,6 @@ Este é um projeto base para a disciplina de Compiladores, desenvolvido em Java 
 ```bash
 ./mvnw clean package && java -jar target/compiler.jar -v true -i example.expr
 
- java -jar target/compiler.jar -v -i example.expr
+java -jar target/compiler.jar -v -i example.expr
 ```
 ```
